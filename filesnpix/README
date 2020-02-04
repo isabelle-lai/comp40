@@ -1,0 +1,201 @@
+/********************************************
+* SECTION A: Filesnpix
+* Comp 40 - Spring 2020
+* Hw1: Filesnpix
+* Andrea Foo (afoo01) and Isabelle Lai (ilai 01) 
+* Due: January 31, 2020
+* 
+* README: Documentation of Comp40 Homework 1
+*********************************************/
+
+SECTION B: ACKNOWLEDGEMENTS
+We got help from the office hours TAs Byron Zhang, Adam Lipson, Ann Marie,
+Imogen Eads. 
+
+SECTION C: PROGRAM PURPOSE
+The purpose of this homework was to explore the use of interfaces like Pnmrdr
+and the Hanson Data Structures in C programming to create one program
+that tests the average brightness of a pgm image file and another program
+that finds similar lines between and within different files and print them
+out on the screen. Both were successfully implemented. 
+
+Part A of the assignment was the brightness program. The program succesfully
+reads and computes the average brightness of the pixels in a given pgm image.
+It also checks for any errors in file formats or inputs given.
+
+Part B of the assignment was the readaline function that takes a pointer
+at a position in a file and reads the line in the file. It was succesfully
+implemented with 200 character line at first and then unlimitted characters 
+in a line later on. 
+
+Part C of the assignment was the simlines program that called readaline. 
+The simlines program checks different amount of files and prints all the lines
+and their locations in the various files if the same line appears twice or
+more in more than one location. This was successfully implemented for any
+amount of files and it also displays appropriate error messages when
+incorrect files/incorrect file formatting of lines in file appear. 
+
+Number of hours worked on the homework: 20 hours
+
+/*****************************************************************************/
+ * ADDITIONAL INFORMATION                                                    *
+/*****************************************************************************/
+
+SECTION D: FILES
+brightness.c simlines.c readaline.c README Makefile
+
+brightness.c: Find the average brightness of a pgm image file
+
+simlines.c: find similar lines between different number of files
+
+readaline.c: read in a line from a file
+
+
+SECTION E: COMPILE AND RUN INSTRUCTIONS
+Compile/run: Compile using "make"
+
+1. Compile/run brightness: Compile using "make brightness"
+    Run executable with "./brightness" with pgm file for brightness program
+2. Compile/run simlines: Compile using "make simlines"
+    Run executable with "./simlines" with textfiles to find similar lines
+    between and within different textfiles. 
+
+
+SECTION F: DATA STRUCTURES
+The simlines program uses a hanson data table that uses atoms as keys
+and pointers to sequences of matchgroups as the values to store the data of
+every file. The keys would be the lines of every file and would be created by 
+calling readaline and then converting the char* array into an atom. 
+
+Every value in the table is a pointer to a sequence that holds the different
+lines. A line is a struct consisting of the filename
+in which the char * line appears and the line number is the file that the 
+char * line appears. Hence, every sequence in the table is the matchgroup. 
+This allowed efficient search through the Hanson Table for any sequences with
+a length longer than 2, which will then be printed out onto the screen to
+display the various different matchgroups and show where each line appears 
+in every file. 
+
+
+
+SECTION G: TESTING
+
+/******************************************************************************
+* Part A: brightness.c
+*
+* Process of testing: 
+* 1. Tested opening the pgm file function by making sure the program compiled
+* when calling Pnmrdr_new();
+* 2. Tested reading pgm file by making sure the program compiled when calling
+* Pnmrdr_data()
+* 3. Tested getting grayscale numerator of each pixel by making sure program
+* compiles when calling Pnmrdr_get()
+* 4. Test to make sure pix_brightness() was finding the brigthness of a single 
+* pixel correctly by calling it with a test pgm file
+* 5. Test to make sure compute_brightness() found the average brightness
+* of the entire image by calling it with a test pgm file
+* 6. Valgrinded after making sure program was working to make sure that all
+* the memory allocated on the heap was freed so that there are no memory leaks.
+*
+*
+* Testing inputs: 
+* 1. bear.pgm: Expected output was 0.972
+* 2. cellar.pgm: Expected output was 0.000
+*
+******************************************************************************/
+
+/******************************************************************************
+* Part B: readaline.c
+*
+* Process of testing: 
+* 1. made sure that the readaline file linked to simlines and compiles and 
+* prints correctly
+* 2. Made sure that returned pointer after allocating data with malloc is not
+* null
+* 3. Created testfiles with varying numbers of lines and lengths of lines and
+* made sure the program worked for 200 length lines first
+* 4. Made sure that program worked for any length lines after implementing 
+* realloc to have a dynamic character array. 
+* 5. Tested for edge cases by callign function with null arguments and making
+* sure program terminates with appropriate output
+* 6. Valgrinded to test for memory leaks for any malloc-d data
+*
+*
+* Testing inputs: 
+* Testfile1: 0 lines
+* Testfile2: “Hello,       my name is     Isabelle”
+* Testfile3:
+*       “Line 1”
+*       “Line 2”
+*       “Line 3”
+*       “Line 4”
+* 
+* 1. Input: Testfile2
+*    Output: First call of readaline: “Hello my name is Isabelle”
+*            Second call of readaline: “”
+* 2. Input: Testfile1
+*    Output: First call of readaline: “”
+* 3. Input: Testfile 2
+*    Output: First call of readaline: “Line 1”
+*            Second call of readaline: “Line 2”
+*            Third call of readaline: “Line 3”
+*            Fourth call of readaline: “Line 4”
+*            Fifth call of readaline: “”
+* 4. Input: readalines(NULL, datapp)
+*    Result: Checked Runtime error, program terminates with exit_failure
+* 5. Input: readalines(inputfd, NULL)
+*    Result: Checked Runtime error, program terminates with exit_failure
+* 6. Input: readalines(NULL, NULL)
+*    Result: Checked Runtime error, program terminates with exit_failure
+* 7. Input: Testfile4. Case when testFile4 does not exist:
+*    Result: Checked Runtime error, program terminates with exit_failure
+* 8. Input: Case when memory allocation fails and malloc returns NULL
+*    Result: Checked Runtime error, program terminates with exit_failure
+*
+******************************************************************************/
+
+
+/******************************************************************************
+* Part C: simlines.c
+*
+* Process of testing: 
+* 1. Link readaline file to simlines file and check that it compiles when 
+* calling the readaline function
+* 2. After creating the hanson table that stores all the data read in from test
+* files, print out the matchgroups
+* 3. Valgrind to test for memory leaks
+*
+*
+* Testing inputs: 
+* Testfile1: 
+*       “Line1”
+*       “Line2”
+*       “Line3”
+* Testfile2: 
+*       “Line3”
+* Testfile3: 
+*       “Line4”
+*       “Line4”
+* Testfile4: 
+*       “Line2”
+*       “Line3”
+*
+* 1. Input: ./simlines Testfile1 Testfile2
+*    Output: 
+*       Line3
+*       Testfile1----------3
+*       Testfile2----------1
+* 2. Input: ./simlines Testfile3
+*    Output: 
+*       Line4
+*       Testfile3----------1
+*       Testfile3----------2
+* 3. Input: ./simlines Testfile1 Testfile4
+*    Output: 
+*       Line2
+*       Testfile1----------2
+*       Testfile4----------1
+*       Line3
+*       Testfile1----------3
+*       Testfile4----------2
+******************************************************************************/
