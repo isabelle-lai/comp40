@@ -89,4 +89,3 @@ brightness: brightness.o
 
 simlines: simlines.o readaline.o
 	$(CC) $(LDFLAGS) -o simlines  simlines.o readaline.o $(LDLIBS)
-
