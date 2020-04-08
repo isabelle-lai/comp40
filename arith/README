@@ -1,1 +1,98 @@
+Names: Isabelle Lai (ilai01) and Andrea Foo (afoo01)
 
+TAs: Ann Marie, Danielle, Jessica, Byron, Alex, Lucas, Imogen, Ben London
+
+To our knowledge, we believe all the files required for submission have been 
+correctly implemented.
+
+Hours spent analyzing the problem: 6 hours 
+
+Hours spent solving the problem after analysis: approximately 24 hours
+
+
+ARCHITECTURE OF SOLUTION: 
+
+For our solution, we attempted to make it as modular as possible while still
+hiding as much unnecessary details from the client as much as we can. 
+
+An arith_structs module was created in order to be able to be able to limit
+as much interaction between different modules as possible. In this arith_structs
+module, the comp_vid pixel struct, blocked_comp vid pixel struct, and scaled
+pixel struct were defined. Getters and setter functions were also added to
+the interface file so that each module that needed to manipulate or use
+the structs could access it without having access to the implementation details
+behind every struct. This allows limitted interaction between different modules
+because the only thing needed to be included in all the modules was the
+arith_structs module. While there were other structs in this implementation, 
+such as the rgb_float pixel struct, they were hidden in the file that they
+were implemented since they were simply intermediate steps that the
+client did not need access to in order to be able to use the module. 
+
+The modules in this solution that were specifically for compression/
+decompression steps were: 
+
+1. rgb_to_comp_vid
+2. blocked_comp_vid
+3. scaled_comp_vid
+4. pack_word
+5. processed_compressed
+
+Each of these modules contained either one or a series of compression
+steps that allowed the conversion between different image formats. A 
+corresponding decompression step for every compression step in each
+module was also implemented. A detailed description of each conversion will now
+be provided below:
+
+1. rgb_to_comp_vid: Since the original pnm ppm images are made up of
+rgb pixels which are scaled integers, we first converted these scaled integers
+to floating point numbers using division with the denominator. The
+floating point rgb values were then converted to component video form
+based on equations provided by the spec. The corresponding decompression step
+converted the component video pixel to floating point rgb and then back to
+scaled rgb. 
+
+2. blocked_comp_vid: This module compressed each component video pixel and
+packed it in 2 by 2 pixel per block. This was acheived by averaging the 
+chroma pb and pr values of 4 pixels  as well as using direct cosine 
+transformation for the y values of every 4 pixels to a,b,c,d. This led to
+some loss in data, thus compressing the image. The corresponding decompression
+step expands the image by multiplying the height and width by 2 and then
+putting the same averaged values found for each 2x2 block in the old image 
+into four pixels in the new image. For the y value, reverse DCT was applied
+and the same y value in one block was applied to four corresponding pixels in 
+the new image. 
+
+3. scaled_comp_vid: In this module, we further compressed by quantizing the
+values of the floats a,b,c,d and using the provided Arith40_index_of_chroma
+function to scale the pb and pr values. A corresponding decompression step
+is also implemented here to dequantize the pixel values.
+
+4. pack_word: In this module, we used the bitpack module that we created
+concurrently with the compression steps to pack each scaled a,b,c,d,pb,pr pixel
+values into a 32 bit word. A corresponding decompression step is also
+implemented here to convert the 32 bit words back to scaled pixels. 
+
+5. process_compressed: In this module, the final compressed image composed
+of 32 bit words is printed to standard output in binary and it also
+consists of a corresponding decompress function the reads in a binary
+text file of 32 bit words and converts it to a pnm ppm scaled pixel image. 
+
+Additionally, we created the bitpack module that provided functions for us
+to manipulate the bits of a word and pack the values of a scaled pixel
+into a 32 bit word using fit, get, and set functions for both signed and 
+unsigned 64 bit words. 
+
+In all of these modules, the interface file holds only the compress and 
+decompress functions that the client can access to compress one image format 
+down to another. This allows the solution to be modular while also packaging 
+the secrets in each module. 
+
+In each of the compression/decompression modules, there are only 2 functions in
+each compress and decompress. At each step of the conversion, the client is
+able to access it and call it on the files. This was done in compress 40 as
+a series of compression functions from these modules are called to 
+compress a given image that the user passes in in the command line. However,
+the client is only able to access these compress and decompress functions, and
+are not able to see the details and how each module is implemented if
+they are not given the .c files. This thus displays modularity and abstraction,
+which is the ultimate goal for this assignment. 
